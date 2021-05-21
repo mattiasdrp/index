@@ -1026,6 +1026,9 @@ struct
 
   let close = close' ~hook:(fun _ -> ())
 
+  let root it =
+    match !it with None -> failwith "Instance closed" | Some t -> t.root
+
   module Checks = Checks.Make (K) (V) (Platform)
 end
 
