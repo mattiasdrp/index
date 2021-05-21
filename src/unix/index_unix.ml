@@ -62,6 +62,7 @@ module IO : Index.IO = struct
     flush ~with_fsync:true src;
     Raw.close dst.raw;
     Unix.rename src.file dst.file;
+    Format.eprintf "-------Rename------- %s -> %s@." src.file dst.file;
     Buffer.clear dst.buf;
     src.file <- dst.file;
     dst.header <- src.header;
@@ -72,6 +73,7 @@ module IO : Index.IO = struct
 
   let close t =
     if not t.readonly then Buffer.clear t.buf;
+    Format.eprintf "-------Close------- %s@." t.file;
     Raw.close t.raw
 
   let auto_flush_limit = Int63.of_int 1_000_000
@@ -180,6 +182,7 @@ module IO : Index.IO = struct
     (* Set new generation in the old file. *)
     Raw.Header.set old
       { Raw.Header.offset = Int63.zero; generation; version = current_version };
+    Format.eprintf "-------Clear------- %s@." t.file;
     Raw.close old
 
   let () = assert (String.length current_version = 8)
@@ -248,6 +251,7 @@ module IO : Index.IO = struct
       with Raw.Not_written ->
         (* The readonly instance cannot read a file that does not have a
            header.*)
+        Format.eprintf "-------Exception-------@.";
         Raw.close raw;
         Error `No_file_on_disk
     with
